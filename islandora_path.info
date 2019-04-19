@@ -1,0 +1,9 @@
+name = Islandora path
+description = Allow pathauto exposure in Object Properties
+configure = admin/islandora/tools/islandora-path
+package = Islandora Tools
+dependencies[] = pathauto
+dependencies[] = token
+dependencies[] = islandora
+core = 7.x
+version = 7.x-dev
