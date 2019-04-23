@@ -1,5 +1,5 @@
 name = Islandora path
-description = Allow pathauto exposure in Object Properties
+description = Allow pathauto exposure in Object Properties 
 configure = admin/islandora/tools/islandora-path
 package = Islandora Tools
 dependencies[] = pathauto
