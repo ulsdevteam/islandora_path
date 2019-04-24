@@ -1,0 +1,23 @@
+<?php
+
+// Form ID: "islandora_object_properties_form"
+
+/**
+ * Implements hook_form_alter()
+ * 
+ * @param type $form
+ * @param type $form_state
+ * @param type $form_id
+ * @return type
+ */
+function  mymodule_form_alter(&$form, &$form_state, $form_id) {
+    if ($form_id == 'islandora_object_properties_form') {
+        $form['auto_alias'] = [
+            '#type' => 'checkbox',
+            '#title' => t("Generate"),
+            '#required' => TRUE,
+        ];
+    }
+    echo $form_state;
+    return;
+}
