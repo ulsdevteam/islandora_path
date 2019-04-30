@@ -23,17 +23,19 @@ function islandora_path_form_alter(&$form, &$form_state, $form_id) {
             '#type' => 'checkbox',
             '#title' => t("Generate a automatic URL Alias"),
             '#weight' => 11,
+            '#description' => t('Uncheck this to create a custom alias below. <a href="@url_alias">  Configure URL alias patterns.</a>' ,
+                    array('@url_alias' => 'https://stage.library.pitt.edu/admin/config/search/path/patterns'))
         ];
         $form['manual_alias'] = [
             '#type' => 'textfield',
-            '#title' => t("Preferred URL:"),
+            '#title' => t("URL alias:"),
             '#weight' => 12,
             '#states' => array(
                 'disabled' => array(
                     ':input[name="auto_alias"]' => array('checked' => TRUE),
                 ),
             ),
+            '#description' => t('Optionally specify an alternative URL by which this content can be accessed. For example, type "about" when writing an about page. Use a relative path and dont add a trailing slash or the URL alias wont work.'),
         ];
     }
-    return;
 }
