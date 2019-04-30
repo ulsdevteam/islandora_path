@@ -10,14 +10,30 @@
  * @param type $form_id
  * @return type
  */
-function  mymodule_form_alter(&$form, &$form_state, $form_id) {
+function islandora_path_form_alter(&$form, &$form_state, $form_id) {
     if ($form_id == 'islandora_object_properties_form') {
+        foreach ($form as $key => $entry) {
+            if ($key[0] !== '#' && ($key !== 'submit' && $key !== 'delete')) {
+                $form[$key]['#weight'] = 10;
+            }
+            $form['submit']['#weight'] = 15;
+            $form['delete']['#weight'] = 15;
+        }
         $form['auto_alias'] = [
             '#type' => 'checkbox',
-            '#title' => t("Generate"),
-            '#required' => TRUE,
+            '#title' => t("Generate a automatic URL Alias"),
+            '#weight' => 11,
+        ];
+        $form['manual_alias'] = [
+            '#type' => 'textfield',
+            '#title' => t("Preferred URL:"),
+            '#weight' => 12,
+            '#states' => array(
+                'disabled' => array(
+                    ':input[name="auto_alias"]' => array('checked' => TRUE),
+                ),
+            ),
         ];
     }
-    echo $form_state;
     return;
 }
