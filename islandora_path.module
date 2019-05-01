@@ -23,8 +23,7 @@ function islandora_path_form_alter(&$form, &$form_state, $form_id) {
             '#type' => 'checkbox',
             '#title' => t("Generate a automatic URL Alias"),
             '#weight' => 11,
-            '#description' => t('Uncheck this to create a custom alias below. <a href="@url_alias">  Configure URL alias patterns.</a>' ,
-                    array('@url_alias' => 'https://stage.library.pitt.edu/admin/config/search/path/patterns'))
+            '#description' => 'Uncheck this to create a custom alias below. ' . l(t('Configure URL alias patterns.'), 'admin/config/search/path/patterns')
         ];
         $form['manual_alias'] = [
             '#type' => 'textfield',
