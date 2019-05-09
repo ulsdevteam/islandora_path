@@ -36,12 +36,29 @@ function islandora_path_form_alter(&$form, &$form_state, $form_id) {
             ),
             '#description' => t('Optionally specify an alternative URL by which this content can be accessed. For example, type "about" when writing an about page. Use a relative path and dont add a trailing slash or the URL alias wont work.'),
         ];
-        $form['#submit'] = array('islandora_object_properties_form_submit','islandora_path_object_properties_form_submit');
+        $form['#submit'] = array('islandora_object_properties_form_submit', 'islandora_path_object_properties_form_submit');
     }
 }
 
-function islandora_path_object_properties_form_submit(array $form, array &$form_state){
-    if(function_exists('path_save')){
-        #TODO: Save path here that needs to be unique
+function islandora_path_object_properties_form_submit(array $form, array &$form_state) {
+    if (function_exists('path_save')) {
+        if($form["manual_alias"]!=""){
+            _islandora_path_save_alias($form_state['object'], 'manual_path_save', $form, $form_state);
+        }
     }
+}
+
+function _islandora_path_save_alias($object, $op ,$form,$form_state) {
+    $path = array();
+    $path['original'] = 'islandora/object/' . $object->id;
+    $path['alias'] = $form['manual_alias']['#value'];
+    $pid = _islandora_path_existing_alias_data($path['original']);
+    $path['pid'] = $pid['pid'];
+    $path['source'] = $pid['source'];
+    path_save($path);
+    
+}
+function _islandora_path_existing_alias_data($source, $language = LANGUAGE_NONE) {
+  $pid = db_query_range("SELECT pid FROM {url_alias} WHERE source = :source AND language IN (:language, :language_none) ORDER BY language DESC, pid DESC", 0, 1, array(':source' => $source, ':language' => $language, ':language_none' => LANGUAGE_NONE))->fetchField();
+  return path_load(array('pid' => $pid));
 }
