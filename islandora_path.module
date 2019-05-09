@@ -12,6 +12,10 @@
  */
 function islandora_path_form_alter(&$form, &$form_state, $form_id) {
     if ($form_id == 'islandora_object_properties_form') {
+        $object = $form_state['object'];
+        $path = array();
+        $path['original'] = 'islandora/object/' . $object->id;
+        $pid = _islandora_path_existing_alias_data($path['original']);
         foreach ($form as $key => $entry) {
             if ($key[0] !== '#' && ($key !== 'submit' && $key !== 'delete')) {
                 $form[$key]['#weight'] = 10;
@@ -28,6 +32,7 @@ function islandora_path_form_alter(&$form, &$form_state, $form_id) {
         $form['manual_alias'] = [
             '#type' => 'textfield',
             '#title' => t("URL alias:"),
+            '#default_value' => $pid['alias'],
             '#weight' => 12,
             '#states' => array(
                 'disabled' => array(
@@ -42,13 +47,13 @@ function islandora_path_form_alter(&$form, &$form_state, $form_id) {
 
 function islandora_path_object_properties_form_submit(array $form, array &$form_state) {
     if (function_exists('path_save')) {
-        if($form["manual_alias"]!=""){
+        if ($form["manual_alias"] != "") {
             _islandora_path_save_alias($form_state['object'], 'manual_path_save', $form, $form_state);
         }
     }
 }
 
-function _islandora_path_save_alias($object, $op ,$form,$form_state) {
+function _islandora_path_save_alias($object, $op, $form, $form_state) {
     $path = array();
     $path['original'] = 'islandora/object/' . $object->id;
     $path['alias'] = $form['manual_alias']['#value'];
@@ -56,9 +61,9 @@ function _islandora_path_save_alias($object, $op ,$form,$form_state) {
     $path['pid'] = $pid['pid'];
     $path['source'] = $pid['source'];
     path_save($path);
-    
 }
+
 function _islandora_path_existing_alias_data($source, $language = LANGUAGE_NONE) {
-  $pid = db_query_range("SELECT pid FROM {url_alias} WHERE source = :source AND language IN (:language, :language_none) ORDER BY language DESC, pid DESC", 0, 1, array(':source' => $source, ':language' => $language, ':language_none' => LANGUAGE_NONE))->fetchField();
-  return path_load(array('pid' => $pid));
+    $pid = db_query_range("SELECT pid FROM {url_alias} WHERE source = :source AND language IN (:language, :language_none) ORDER BY language DESC, pid DESC", 0, 1, array(':source' => $source, ':language' => $language, ':language_none' => LANGUAGE_NONE))->fetchField();
+    return path_load(array('pid' => $pid));
 }
