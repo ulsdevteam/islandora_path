@@ -23,7 +23,7 @@ function islandora_path_form_alter(&$form, &$form_state, $form_id) {
             $form['submit']['#weight'] = 15;
             $form['delete']['#weight'] = 15;
         }
-        $form['auto_alias'] = [
+        $form['auto_alias'] = [ #TODO: Load in value from islandora_pathauto_state
             '#type' => 'checkbox',
             '#title' => t("Generate a automatic URL Alias"),
             '#weight' => 11,
@@ -47,6 +47,7 @@ function islandora_path_form_alter(&$form, &$form_state, $form_id) {
 
 function islandora_path_object_properties_form_submit(array $form, array &$form_state) {
     if (function_exists('path_save')) {
+        #TODO: Save to islandora_pathuato_state based on checkbox value
         if ($form["manual_alias"] != "") {
             _islandora_path_save_alias($form_state['object'], 'manual_path_save', $form, $form_state);
         }
@@ -60,6 +61,7 @@ function _islandora_path_save_alias($object, $op, $form, $form_state) {
     $pid = _islandora_path_existing_alias_data($path['original']);
     $path['pid'] = $pid['pid'];
     $path['source'] = $pid['source'];
+    #TODO: What if this path is already taken? Implement feature
     path_save($path);
 }
 
