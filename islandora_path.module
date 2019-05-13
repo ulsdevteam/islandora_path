@@ -16,6 +16,8 @@ function islandora_path_form_alter(&$form, &$form_state, $form_id) {
         $path = array();
         $path['original'] = 'islandora/object/' . $object->id;
         $pid = _islandora_path_existing_alias_data($path['original']);
+        #TODO: Check is checkbox is completed
+        $pathauto_state = _islandora_path_state_load($pid['pid']);
         foreach ($form as $key => $entry) {
             if ($key[0] !== '#' && ($key !== 'submit' && $key !== 'delete')) {
                 $form[$key]['#weight'] = 10;
@@ -62,10 +64,20 @@ function _islandora_path_save_alias($object, $op, $form, $form_state) {
     $path['pid'] = $pid['pid'];
     $path['source'] = $pid['source'];
     #TODO: What if this path is already taken? Implement feature
+    #TODO: Save whether the generate alias has been checked
     path_save($path);
 }
 
 function _islandora_path_existing_alias_data($source, $language = LANGUAGE_NONE) {
     $pid = db_query_range("SELECT pid FROM {url_alias} WHERE source = :source AND language IN (:language, :language_none) ORDER BY language DESC, pid DESC", 0, 1, array(':source' => $source, ':language' => $language, ':language_none' => LANGUAGE_NONE))->fetchField();
     return path_load(array('pid' => $pid));
+}
+
+function _islandora_path_state_load($pid) {
+    $state = db_query("SELECT islandora_pathauto_state FROM {islandora_pathauto_state} WHERE object_id = :object_id ",
+            [':object_id' => $pid]);
+    foreach($result as $state){
+        echo $result;
+    }
+    return $state;
 }
