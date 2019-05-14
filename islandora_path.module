@@ -29,6 +29,7 @@ function islandora_path_form_alter(&$form, &$form_state, $form_id) {
             '#type' => 'checkbox',
             '#title' => t("Generate a automatic URL Alias"),
             '#weight' => 11,
+            '#default_value' => boolval($pathauto_state),
             '#description' => 'Uncheck this to create a custom alias below. ' . l(t('Configure URL alias patterns.'), 'admin/config/search/path/patterns')
         ];
         $form['manual_alias'] = [
@@ -56,6 +57,10 @@ function islandora_path_object_properties_form_submit(array $form, array &$form_
     }
 }
 
+/*
+ * Save the alias to the url_alias table
+ */
+
 function _islandora_path_save_alias($object, $op, $form, $form_state) {
     $path = array();
     $path['original'] = 'islandora/object/' . $object->id;
@@ -64,20 +69,48 @@ function _islandora_path_save_alias($object, $op, $form, $form_state) {
     $path['pid'] = $pid['pid'];
     $path['source'] = $pid['source'];
     #TODO: What if this path is already taken? Implement feature
-    #TODO: Save whether the generate alias has been checked
+    $amount_updated = _islandora_path_update_pathauto_state($pid['pid'], $form_state['values']['auto_alias']);   
     path_save($path);
 }
 
 function _islandora_path_existing_alias_data($source, $language = LANGUAGE_NONE) {
+    #TODO: Refactor this below to look better using correct function
     $pid = db_query_range("SELECT pid FROM {url_alias} WHERE source = :source AND language IN (:language, :language_none) ORDER BY language DESC, pid DESC", 0, 1, array(':source' => $source, ':language' => $language, ':language_none' => LANGUAGE_NONE))->fetchField();
     return path_load(array('pid' => $pid));
 }
 
+/*
+ * Change the state of the object in the db if the checkbox has been checked
+ * @returns Number of rows affected, should always be either 1 or 0
+ */
+
+function _islandora_path_update_pathauto_state($object_id, $action) {
+    $num_rows_updated = db_update('islandora_pathauto_state')
+            ->fields(array(
+                'islandora_pathauto_state' => $action,))
+            ->condition('object_id', $object_id, '=')
+            ->execute();
+    return $num_rows_updated;
+}
+
+/*
+ * Query the Database fot the isladnora object to grab the state of the object
+ *  State = 1? Generate a automatic alias for it
+ *  State = 0? This is a unique URL, do not generate url
+ * returns 1 by defualt if no object was found
+ */
+
 function _islandora_path_state_load($pid) {
-    $state = db_query("SELECT islandora_pathauto_state FROM {islandora_pathauto_state} WHERE object_id = :object_id ",
-            [':object_id' => $pid]);
-    foreach($result as $state){
-        echo $result;
+    #TODO: Refactor below to look correctly
+    $state = db_query("SELECT islandora_pathauto_state FROM {islandora_pathauto_state} WHERE object_id = :object_id ", [':object_id' => $pid]);
+    foreach ($state as $result) {
+        return $result->islandora_pathauto_state;
     }
-    return $state;
+    if ($state->rowCount() == 0) { #If this object is not in the db, lets add it and default to generate a url
+        $result = db_insert('islandora_pathauto_state')->fields(array(
+                    'object_id' => $pid,
+                    'islandora_pathauto_state' => 1,
+                ))->execute();
+    }
+    return 1;
 }
