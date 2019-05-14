@@ -69,7 +69,7 @@ function _islandora_path_save_alias($object, $op, $form, $form_state) {
     $path['pid'] = $pid['pid'];
     $path['source'] = $pid['source'];
     #TODO: What if this path is already taken? Implement feature
-    $amount_updated = _islandora_path_update_pathauto_state($pid['pid'], $form_state['values']['auto_alias']);   
+    $amount_updated = _islandora_path_update_pathauto_state($pid['pid'], $form_state['values']['auto_alias']);
     path_save($path);
 }
 
@@ -111,6 +111,19 @@ function _islandora_path_state_load($pid) {
                     'object_id' => $pid,
                     'islandora_pathauto_state' => 1,
                 ))->execute();
+    }
+    return 1;
+}
+
+/*
+ * Return True or False on whether or not this object should a automatic URL generated for it
+ */
+
+function islandora_path_load_autoaurl_state($object_id) {
+    if ($object_id) {
+        $pid = _islandora_path_existing_alias_data('islandora/object/' . $object_id);
+        $retval = boolval(_islandora_path_state_load($pid['pid']));
+        return $retval;
     }
     return 1;
 }
